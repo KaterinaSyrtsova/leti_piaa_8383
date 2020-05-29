@@ -1,0 +1,8 @@
+ACGTATA
+6
+AA
+AC
+AT
+C
+G
+T

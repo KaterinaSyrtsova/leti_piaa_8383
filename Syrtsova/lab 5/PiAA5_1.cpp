@@ -95,7 +95,7 @@ void info() {
 		count[i] = 0;
 		cout << endl << "Вершина номер " << i << endl;
 		if (i == 0) cout << "Это корень бора" << endl;
-		else cout << "Вершина-родитель с номером " << bohr[i].par << ". Переход по символу " << vertex(bohr[i].symbol) << endl;
+		else cout << "Вершина-родитель с номером " << bohr[i].par << " по символу " << vertex(bohr[i].symbol) << endl;
 		cout << "Соседние вершины:" << endl;
 		for (int j = 0; j < ALP; j++) {
 			if (bohr[i].next_vertex[j] != -1) {
@@ -108,7 +108,7 @@ void info() {
 		if (bohr[i].suff_link == -1) cout << "еще не посчитана." << endl;
 		else cout << vertex(bohr[i].suff_link) << endl;
 	}
-	for (int i = 0; i < bohr.size(); i++) 
+	for (int i = 0; i < bohr.size(); i++)
 		if (count[i] > max) max = count[i];
 	cout << endl << "Максимальное количество дуг, исходящих из одной вершины " << max << endl;
 }
@@ -119,12 +119,12 @@ void add_string_to_bohr(string s) {//вставляет строку в бор
 	for (int i = 0; i < s.length(); i++) {//проходится по строке
 		char ch = find(s[i]);//находит номер символа
 		if (bohr[num].next_vertex[ch] == -1) {//добавляется новая вершина если её не было
-			cout << "Добавим новую вершину " << s[i] << endl;
 			bohr.push_back(make_bohr_vertex(num, ch));
 			bohr[num].next_vertex[ch] = bohr.size() - 1;
+			cout << "Добавим новую вершину " << bohr[num].next_vertex[ch] << " по символу " << s[i] << endl;
 		}
-		else cout << "Вершина " << s[i] << " уже есть в боре" << endl;
-		cout << "Перейдем к вершине " << s[i] << endl;
+		else cout << "Вершина по символу " << s[i] << " уже есть в боре" << endl;
+		cout << "Перейдем к вершине " << bohr[num].next_vertex[ch] << endl;
 		num = bohr[num].next_vertex[ch];//переходим к следующей вершине
 	}
 	cout << "Финальная вершина шаблона." << endl << endl;
@@ -136,28 +136,28 @@ void add_string_to_bohr(string s) {//вставляет строку в бор
 int get_auto_move(int v, char ch);
 
 int get_suff_link(int v) {//реализует получение суффиксной ссылки для данной вершины
-	cout << endl << "Найдем суффиксную ссылку для вершины " << vertex(bohr[v].symbol) << endl;
+	cout << endl << "Найдем суффиксную ссылку для вершины " << v << endl;
 	if (bohr[v].suff_link == -1) {
 		if (v == 0 || bohr[v].par == 0) {//если это корень или начало шаблона
-			if (v==0) cout << "Текущая вершина - корень бора. Суффиксная ссылка равна 0." << endl;
+			if (v == 0) cout << "Текущая вершина - корень бора. Суффиксная ссылка равна 0." << endl;
 			else cout << "Текущая вершина - начало шаблона. Суффиксная ссылка равна 0." << endl;
 			bohr[v].suff_link = 0;
 		}
 		else {
-			cout << "Пройдем по суффиксной ссылке предка " << vertex(bohr[bohr[v].par].symbol) << " и запустим переход по символу " << vertex(bohr[v].symbol) << endl;
+			cout << "Пройдем по суффиксной ссылке предка " << bohr[v].par << " и запустим переход по символу " << vertex(bohr[v].symbol) << endl;
 			bohr[v].suff_link = get_auto_move(get_suff_link(bohr[v].par), bohr[v].symbol);  //пройдем по суф.ссылке предка и запустим переход по символу.
-			cout << "Значит суффиксная ссылка для вершины " << vertex(bohr[v].symbol) << " равна " << vertex(bohr[v].suff_link) << endl << endl;
+			cout << "Значит суффиксная ссылка для вершины " << v << " равна " << bohr[v].suff_link << endl << endl;
 		}
 	}
-	else cout << "Суффиксная ссылка для вершины " << vertex(bohr[v].symbol) << " равна " << vertex(bohr[v].suff_link) << endl << endl;
+	else cout << "Суффиксная ссылка для вершины " << v << " равна " << bohr[v].suff_link << endl << endl;
 	return bohr[v].suff_link;
 }
 
 int get_auto_move(int v, char ch) {             //вычисляемая функция переходов
 	if (bohr[v].auto_move[ch] == -1) {
 		if (bohr[v].next_vertex[ch] != -1) {            //если из текущей вершины есть ребро с символом ch
-			cout << "Из вершины " << vertex(bohr[v].symbol) << " есть ребро с символом " << vertex(ch) << endl;
-			cout << "Переходим по этому ребру." << endl;
+			cout << "Из вершины " << v << " есть ребро с символом " << vertex(ch) << endl;
+			cout << "Переходим по этому ребру в вершину " << bohr[v].next_vertex[ch] << endl;
 			bohr[v].auto_move[ch] = bohr[v].next_vertex[ch];    //то идем по нему
 		}
 		else {//если нет
@@ -166,7 +166,7 @@ int get_auto_move(int v, char ch) {             //вычисляемая фун�
 				bohr[v].auto_move[ch] = 0;
 			}
 			else {
-				cout << "Из вершины " << vertex(bohr[v].symbol) << " нет ребра с символом " << vertex(ch) << endl;
+				cout << "Из вершины " << v << " нет ребра с символом " << vertex(ch) << endl;
 				cout << "Перейдем по суффиксной ссылке." << endl << endl;
 				bohr[v].auto_move[ch] = get_auto_move(get_suff_link(v), ch);  //иначе перейдем по суффиксальной ссылке
 			}
@@ -203,13 +203,14 @@ void find_all_pos(string s) {//поиск шаблонов в строке
 	cout << endl << "Вычислим функции переходов." << endl << endl;
 	for (int i = 0; i < s.length(); i++) {
 		u = get_auto_move(u, find(s[i]));
-
-		if (bohr[u].flag) {
-			arr[n][0] = i - pattern[bohr[u].path_num].length() + 2;
-			arr[n][1] = bohr[u].path_num + 1;
-			n++;
+		for (int v = u; v != 0; v = get_suff_flink(v)) {
+			if (bohr[v].flag) {
+				cout << v << endl;
+				arr[n][0] = i - pattern[bohr[v].path_num].length() + 2;//?
+				arr[n][1] = bohr[v].path_num + 1;
+				n++;
+			}
 		}
-
 		check(u, i + 1);//отмечаем по сжатым суффиксным ссылкам строки, которые нам встретились и их позицию
 	}
 	system("pause");
@@ -220,6 +221,9 @@ void find_all_pos(string s) {//поиск шаблонов в строке
 	for (int i = n-1; i >=0; i--) {
 		string::const_iterator sub = find_end(s.begin(), s.end(), (pattern[arr[i][1] - 1]).begin(), (pattern[arr[i][1] - 1]).end());
 		if (sub != s.end()) {
+			if (i != 0 && arr[i - 1][0] + pattern[arr[i - 1][1] - 1].size() - 1 >= arr[i][0])
+				s.erase(sub + arr[i - 1][0] + pattern[arr[i - 1][1]-1].size() - arr[i][0], sub + pattern[arr[i][1] - 1].size());
+			else
 				s.erase(sub, sub + pattern[arr[i][1] - 1].size());
 		}
 	}

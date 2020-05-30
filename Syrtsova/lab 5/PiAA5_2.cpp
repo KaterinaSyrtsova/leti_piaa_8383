@@ -184,6 +184,7 @@ int get_auto_move(int v, char ch) {             //вычисляемая фун�
 			}
 		}
 	}
+	cout << "Переход к вершине " << bohr[v].auto_move[ch] << " по символу " << vertex(bohr[bohr[v].auto_move[ch]].symbol) << endl;
 	return bohr[v].auto_move[ch];
 }
 
@@ -200,7 +201,7 @@ int get_suff_flink(int v) {//функция вычисления сжатых с
 	return bohr[v].suff_flink;
 }
 
-void check(int v, int i) {
+void check(int v, int i) {//////////////////////////////////////////////////////////////////////////////////////////////////
 	struct numbers s;
 	for (int u = v; u != 0; u = get_suff_flink(u)) {
 		if (bohr[u].flag) {
@@ -208,23 +209,29 @@ void check(int v, int i) {
 				if (bohr[u].pattern_num[j] != -1) {
 					s.index = i - pattern[bohr[u].pattern_num[j]].length();
 					s.pattern_num = bohr[u].pattern_num[j];
-					cout << "Найден подшаблон с номером " << s.pattern_num << ", позиция в тексте " << s.index << endl;
+					cout << endl << "Вершина " << u << " конечная для шаблона " << s.pattern_num+1 << endl;
+					cout << "Найден подшаблон с номером " << s.pattern_num+1 << ", позиция в тексте " << s.index << endl;
 					num.push_back(s);
 				}
 				else
 					break;
 			}
 		}
+		else cout << endl << "Вершина " << u << " не конечная" << endl;
+		cout << "Перейдем по сжатой суффиксной ссылке " << vertex(bohr[u].suff_flink) << endl;
 	}
 }
 
 void find_all_pos(string s) {
 	int u = 0;
-	cout << endl << "Вычислим функции переходов." << endl << endl;
 	for (int i = 0; i < s.length(); i++) {
+		cout << endl << "Текущая вершина " << u << endl << "Вычислим функцию переходов." << endl << endl;
 		u = get_auto_move(u, find(s[i]));
+		cout << endl << "Перейдем по хорошим суффиксным ссылкам вершины  " << u;
+		if (i+1!= s.length()) cout << " по символу " << s[i + 1] << endl;
 		check(u, i + 1);
 	}
+	cout << endl << "Проход по строке текста завершен." << endl;
 }
 
 int main() {

@@ -172,6 +172,7 @@ int get_auto_move(int v, char ch) {             //вычисляемая фун�
 			}
 		}
 	}
+	cout << "Переход к вершине " << bohr[v].auto_move[ch] << " по символу " << vertex(bohr[bohr[v].auto_move[ch]].symbol) << endl;
 	return bohr[v].auto_move[ch];
 }
 
@@ -191,42 +192,54 @@ int get_suff_flink(int v) {//функция вычисления сжатых с
 void check(int v, int i) {
 	for (int u = v; u != 0; u = get_suff_flink(u)) {
 		if (bohr[u].flag) {
+			cout << endl << "Вершина " << u << " конечная для шаблона " << bohr[u].path_num + 1 << endl;
 			cout << endl << "Найден шаблон с номером " << bohr[u].path_num + 1 << ", позиция в тексте " << i - pattern[bohr[u].path_num].length() + 1 << endl;
 		}
+		else cout << endl << "Вершина " << u << " не конечная" << endl;
+		cout << "Перейдем по сжатой суффиксной ссылке " << vertex(bohr[u].suff_flink) << endl;
 	}
+}
+
+vector<pair<int, int>> answer;
+
+int cmp(pair<int, int> a, pair<int, int>  b) {
+	if (a.first == b.first)
+		return a.second < b.second;
+	else
+		return a.first < b.first;
 }
 
 void find_all_pos(string s) {//поиск шаблонов в строке
 	int u = 0;//текущая вершина
-	int n = 0;
-	int arr[20][2];
-	cout << endl << "Вычислим функции переходов." << endl << endl;
 	for (int i = 0; i < s.length(); i++) {
+		cout << endl << "Текущая вершина " << u << endl << "Вычислим функцию переходов." << endl << endl;
 		u = get_auto_move(u, find(s[i]));
 		for (int v = u; v != 0; v = get_suff_flink(v)) {
 			if (bohr[v].flag) {
-				cout << v << endl;
-				arr[n][0] = i - pattern[bohr[v].path_num].length() + 2;//?
-				arr[n][1] = bohr[v].path_num + 1;
-				n++;
+				pair<int, int> res(i - pattern[bohr[v].path_num].length() + 2, bohr[v].path_num + 1);
+				answer.push_back(res);
 			}
 		}
+		cout << endl << "Перейдем по хорошим суффиксным ссылкам вершины  " << u;
+		if (i + 1 != s.length()) cout << " по символу " << s[i + 1] << endl;
 		check(u, i + 1);//отмечаем по сжатым суффиксным ссылкам строки, которые нам встретились и их позицию
 	}
+	cout << endl << "Проход по строке текста завершен." << endl;
 	system("pause");
 	cout << "------------------------------------------------------------------------------" << endl;
-	cout << endl << "Ответ:" << endl << "Позиция в тексте/номер шаблона" << endl;
-	for (int i = 0; i < n; i++) 
-		cout << arr[i][0] << " " << arr[i][1] << endl;
-	for (int i = n-1; i >=0; i--) {
-		string::const_iterator sub = find_end(s.begin(), s.end(), (pattern[arr[i][1] - 1]).begin(), (pattern[arr[i][1] - 1]).end());
+	for (int i = answer.size() -1; i >=0; i--) {
+		string::const_iterator sub = find_end(s.begin(), s.end(), (pattern[answer[i].second - 1]).begin(), (pattern[answer[i].second - 1]).end());
 		if (sub != s.end()) {
-			if (i != 0 && arr[i - 1][0] + pattern[arr[i - 1][1] - 1].size() - 1 >= arr[i][0])
-				s.erase(sub + arr[i - 1][0] + pattern[arr[i - 1][1]-1].size() - arr[i][0], sub + pattern[arr[i][1] - 1].size());
+			if (i != 0 && answer[i-1].second + pattern[answer[i-1].second - 1].size() - 1 >= answer[i].first)
+				s.erase(sub + answer[i].first + pattern[answer[i-1].second -1].size() - answer[i].first, sub + pattern[answer[i].second - 1].size());
 			else
-				s.erase(sub, sub + pattern[arr[i][1] - 1].size());
+				s.erase(sub, sub + pattern[answer[i].second - 1].size());
 		}
 	}
+	sort(answer.begin(), answer.end(), cmp);
+	cout << endl << "Ответ:" << endl << "Позиция в тексте/номер шаблона" << endl;
+	for (int i = 0; i < answer.size(); i++)
+		cout << answer[i].first << " " << answer[i].second << endl;
 	cout << "Строка после удаления найденных шаблонов: " << s << endl;
 }
 

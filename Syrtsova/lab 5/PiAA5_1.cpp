@@ -162,17 +162,14 @@ int get_auto_move(int v, char ch) {             //вычисляемая фун�
 		}
 		else {//если нет
 			if (v == 0) {//если это корень бора
-				//cout << "Текущая вершина " << vertex(bohr[v].symbol) << " - корень бора." << endl;
 				bohr[v].auto_move[ch] = 0;
 			}
 			else {
-				cout << "Из вершины " << v << " нет ребра с символом " << vertex(ch) << endl;
 				cout << "Перейдем по суффиксной ссылке." << endl << endl;
 				bohr[v].auto_move[ch] = get_auto_move(get_suff_link(v), ch);  //иначе перейдем по суффиксальной ссылке
 			}
 		}
 	}
-	cout << "Переход к вершине " << bohr[v].auto_move[ch] << " по символу " << vertex(bohr[bohr[v].auto_move[ch]].symbol) << endl;
 	return bohr[v].auto_move[ch];
 }
 
@@ -196,7 +193,6 @@ void check(int v, int i) {
 			cout << endl << "Найден шаблон с номером " << bohr[u].path_num + 1 << ", позиция в тексте " << i - pattern[bohr[u].path_num].length() + 1 << endl;
 		}
 		else cout << endl << "Вершина " << u << " не конечная" << endl;
-		cout << "Перейдем по сжатой суффиксной ссылке " << vertex(bohr[u].suff_flink) << endl;
 	}
 }
 
@@ -212,8 +208,11 @@ int cmp(pair<int, int> a, pair<int, int>  b) {
 void find_all_pos(string s) {//поиск шаблонов в строке
 	int u = 0;//текущая вершина
 	for (int i = 0; i < s.length(); i++) {
+		cout << endl << "Символ текста " << s[i] << " с индексом " << i+1 << endl;
 		cout << endl << "Текущая вершина " << u << endl << "Вычислим функцию переходов." << endl << endl;
 		u = get_auto_move(u, find(s[i]));
+		if (u != 0) cout << "Переход к вершине " << u << " по символу " << vertex(bohr[u].symbol) << endl;
+		else cout << "Из вершины " << u << " нет ребра с символом " << s[i] << endl;
 		for (int v = u; v != 0; v = get_suff_flink(v)) {
 			if (bohr[v].flag) {
 				pair<int, int> res(i - pattern[bohr[v].path_num].length() + 2, bohr[v].path_num + 1);
@@ -230,10 +229,12 @@ void find_all_pos(string s) {//поиск шаблонов в строке
 	for (int i = answer.size() -1; i >=0; i--) {
 		string::const_iterator sub = find_end(s.begin(), s.end(), (pattern[answer[i].second - 1]).begin(), (pattern[answer[i].second - 1]).end());
 		if (sub != s.end()) {
-			if (i != 0 && answer[i-1].second + pattern[answer[i-1].second - 1].size() - 1 >= answer[i].first)
-				s.erase(sub + answer[i].first + pattern[answer[i-1].second -1].size() - answer[i].first, sub + pattern[answer[i].second - 1].size());
-			else
+			if (i != 0 && answer[i - 1].first + pattern[answer[i - 1].second - 1].size() - 1 >= answer[i].first) {
+					s.erase(sub + answer[i-1].first + pattern[answer[i - 1].second - 1].size() - answer[i].first, sub + pattern[answer[i].second - 1].size());
+			}
+			else 
 				s.erase(sub, sub + pattern[answer[i].second - 1].size());
+			//cout << "Строка: " << s << endl;
 		}
 	}
 	sort(answer.begin(), answer.end(), cmp);
